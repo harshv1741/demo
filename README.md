@@ -1,2 +1,3 @@
 # dsgc-prac
-All my DSGC-Practical Performed by me
+
+My practical examples are written here.
