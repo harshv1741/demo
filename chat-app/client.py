@@ -1,37 +1,38 @@
-#!/usr/bin/python3
-
-# Importing Libraries
 import socket
-import sys
-import select
+import threading
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Choosing Nicknames
+nickname = input("Enter your Nickname: ")
 
-if len(sys.argv) != 3:
-    print("Correct usage: script, IP address, port number")
-    exit()
+# Connecting to server
+client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+client.connect(('127.0.0.1',55555))
 
-IP_address = str(sys.argv[1])
-Port = int(sys.argv[2])
+def receive():
+    while True:
+        try:
+            # Receive Message from Server.
+            # If 'NICK' Send Nickname
+            message = client.recv(1024).decode('ascii')
+            if message == 'NICK':
+                client.send(nickname.encode('ascii'))
+            else:
+                print(message)
+        
+        except:
+            # Close Connection When Error Occurs
+            print("An error occured!")
+            client.close()
+            break
 
-server.connect((IP_address,Port))
+def write():
+    while True:
+        message = '{}: {}'.format(nickname, input(''))
+        client.send(message.encode('ascii'))
 
-while True:
+# Starting Threads for Listening and Writing
+receive_thread = threading.Threading(target=receive)
+receive_thread.start()
 
-    sockets_list = [sys.stdin, server]
-
-    read_sockets, write_socket, error_socket =  select.select(sockets_list,[],[])
-
-    for socks in read_sockets:
-        if socks == server:
-            message = socks.recv(2048)
-            print(message)
-
-        else:
-            message = socks.recv(2048)
-            server.send(message)
-            sys.stdout.write("{you}")
-            sys.stdout.write(message)
-            sys.stdout.flush()
-
-server.close()
+write_thread = threading.Thread(target=write)
+write_thread.start()
