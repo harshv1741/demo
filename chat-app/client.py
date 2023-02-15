@@ -25,13 +25,14 @@ def receive():
             client.close()
             break
 
+# Sending Message To Server
 def write():
     while True:
         message = '{}: {}'.format(nickname, input(''))
         client.send(message.encode('ascii'))
 
 # Starting Threads for Listening and Writing
-receive_thread = threading.Threading(target=receive)
+receive_thread = threading.Thread(target=receive)
 receive_thread.start()
 
 write_thread = threading.Thread(target=write)
